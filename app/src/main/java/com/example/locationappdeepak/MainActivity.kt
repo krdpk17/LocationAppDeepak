@@ -21,13 +21,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.locationappdeepak.ui.theme.LocationAppDeepakTheme
 import android.Manifest
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val viewModel : LocationViewModel = viewModel()
             LocationAppDeepakTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -35,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     //Greeting("Android")
-                    MyLocationApp()
+                    MyLocationApp(viewModel)
                 }
             }
         }
@@ -43,17 +46,20 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyLocationApp(){
+fun MyLocationApp(viewModel: LocationViewModel){
     val context = LocalContext.current
     val myLocationUtils = MyLocationUtils(context)
-    DisplayLocation(myLocationUtils = myLocationUtils, context = context)
+    DisplayLocation(myLocationUtils = myLocationUtils, viewModel,
+                    context = context)
 }
 
 @Composable
 fun DisplayLocation(
     myLocationUtils: MyLocationUtils,
+    viewModel: LocationViewModel,
     context: Context
 ){
+    val location = viewModel.location.value
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
@@ -62,6 +68,7 @@ fun DisplayLocation(
                 permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
                 ){
                 //ok can access location
+                myLocationUtils.requestLocationUpdates(viewModel=viewModel)
             }else{
                 //ask for permission
                 val rationalRequired =  ActivityCompat.shouldShowRequestPermissionRationale(
@@ -84,10 +91,16 @@ fun DisplayLocation(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
     ){
-        Text("location not available")
+
+        if(location != null){
+            Text("location, lat: ${location.latitude} & long: ${location.longitude}")
+        }else{
+            Text("location not available")
+        }
         Button(onClick = {
             if(myLocationUtils.hasLocationPermission(context)){
                 // permission granted -> Update the location
+                myLocationUtils.requestLocationUpdates(viewModel)
             }else{
                 //Request location permission
                 requestPermissionLauncher.launch(
