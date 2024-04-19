@@ -22,7 +22,11 @@ import com.example.locationappdeepak.ui.theme.LocationAppDeepakTheme
 import android.Manifest
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -98,10 +102,12 @@ fun DisplayLocation(
     ){
 
         if(location != null){
-            Text("location, \n lat: ${location.latitude} & long: ${location.longitude} \n $address")
+            Text("location, \n lat: ${location.latitude} & long: ${location.longitude} \n $address",
+                fontSize = 20.sp)
         }else{
             Text("location not available")
         }
+        Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {
             if(myLocationUtils.hasLocationPermission(context)){
                 // permission granted -> Update the location
@@ -116,7 +122,8 @@ fun DisplayLocation(
                 )
             }
         }) {
-            Text("Get Location")
+            Text("Get My Location",
+                fontSize = 20.sp)
         }
     }
 }
